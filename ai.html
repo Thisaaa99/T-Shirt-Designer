@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered T-Shirt Designer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Neucha&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            /* background: #ffc3f64e; */
+
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('../images/bg.jpg');
+            opacity: 0.1;
+            /* Adjust transparency */
+            z-index: -1;
+            /* Places it behind the content */
+        }
+
+        h1 {
+            /* font-family: "Handlee", sans-serif; */
+            font-family: "Amatic SC", sans-serif;
+            font-size: 45px;
+        }
+
+        h3 {
+            /* font-family: "Handlee", sans-serif; */
+            font-family: "Indie Flower", sans-serif;
+            padding-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        label {
+            font-family: "Neucha", sans-serif;
+            font-size: 20px;
+        }
+        
+        .tshirt-container {
+            position: relative;
+            display: inline-block;
+        }
+        #tshirt-image {
+            width: 400px;
+            display: block;
+        }
+        .color-picker, .view-selector {
+            margin-bottom: 15px;
+        }
+        .color-box {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+              border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid black;
+        }
+        #canvas-container {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 125px;
+            height: 230px;
+            border: 2px dashed red;
+        }
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        #generatedImage {
+            width: 100px;
+            height: 100px;
+            cursor: grab;
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>AI-Powered T-Shirt Designer</h1>
+    
+    <div class="color-picker">
+        <div class="color-box" style="background-color: white;" onclick="changeColor('white')"></div>
+        <div class="color-box" style="background-color: black;" onclick="changeColor('black')"></div>
+        <div class="color-box" style="background-color: red;" onclick="changeColor('red')"></div>
+        <div class="color-box" style="background-color: blue;" onclick="changeColor('blue')"></div>
+        <div class="color-box" style="background-color: green;" onclick="changeColor('green')"></div>
+    </div>
+
+    <div class="tshirt-container">
+        <img id="tshirt-image" src="images/white/1.jpg" alt="T-Shirt">
+        <div id="canvas-container">
+            <canvas id="tshirt-canvas" width="125" height="230"></canvas>
+        </div>
+    </div>
+
+    <!-- <div class="view-selector">
+        <button onclick="changeView(1)">Front</button>
+        <button onclick="changeView(2)">Back</button>
+        <button onclick="changeView(3)">Right</button>
+        <button onclick="changeView(4)">Left</button>
+    </div> -->
+    
+    <button onclick="addText()">Add Text</button>
+    
+    <div>
+        <input type="text" id="prompt" placeholder="Describe image">
+        <button onclick="generateImage()">Generate Image</button>
+        <br>
+        <img id="generatedImage" src="" alt="AI-generated Image" draggable="true" ondragstart="drag(event)">
+    </div>
+    
+    <script>
+        let canvas = new fabric.Canvas('tshirt-canvas');
+        let currentColor = 'white';
+        let currentView = 1;
+
+        function changeColor(color) {
+            currentColor = color;
+            updateTshirtImage();
+        }
+
+        function changeView(view) {
+            currentView = view;
+            updateTshirtImage();
+        }
+
+        function updateTshirtImage() {
+            document.getElementById('tshirt-image').src = `images/${currentColor}/${currentView}.jpg`;
+        }
+
+        function addText() {
+            let text = new fabric.Textbox('Your Text', {
+                left: 30,
+                top: 60,
+                fontSize: 20,
+                fontFamily: 'Arial',
+                fill: '#000',
+                textAlign: 'center',
+                editable: true
+            });
+            canvas.add(text);
+        }
+
+        async function generateImage() {
+            const prompt = document.getElementById("prompt").value;
+            if (!prompt) {
+                alert("Please enter a description!");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:5000/generate-image", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                const data = await response.json();
+                if (data.imageUrl) {
+                    document.getElementById("generatedImage").src = data.imageUrl;
+                } else {
+                    alert("Failed to generate image. Try again!");
+                }
+            } catch (error) {
+                console.error("Error fetching AI image:", error);
+                alert("Something went wrong. Check the console.");
+            }
+        }
+
+        function drag(event) {
+            event.dataTransfer.setData("text", event.target.src);
+        }
+
+        document.getElementById("canvas-container").addEventListener("drop", function(event) {
+            event.preventDefault();
+            const imageUrl = event.dataTransfer.getData("text");
+            fabric.Image.fromURL(imageUrl, function(img) {
+                img.scale(0.3);
+                canvas.add(img);
+            });
+        });
+
+        document.getElementById("canvas-container").addEventListener("dragover", function(event) {
+            event.preventDefault();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered T-Shirt Designer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Neucha&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
+    <style>
+        body {
+            text-align: center;
+            font-family: "Handlee", Arial, sans-serif;
+            /* background: #ffc3f64e; */
+
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('../images/bg.jpg');
+            opacity: 0.1;
+            /* Adjust transparency */
+            z-index: -1;
+            /* Places it behind the content */
+        }
+
+        h1 {
+            /* font-family: "Handlee", sans-serif; */
+            font-family: "Amatic SC", sans-serif;
+            font-size: 45px;
+        }
+
+        h3 {
+            /* font-family: "Handlee", sans-serif; */
+            font-family: "Indie Flower", sans-serif;
+            padding-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        label {
+            font-family: "Neucha", sans-serif;
+            font-size: 20px;
+        }
+
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            margin-top: 20px;
+        }
+
+        /* .left-panel,
+        .right-panel {
+            width: 200px;
+        } */
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            /* Stack elements vertically */
+            align-items: center;
+            /* Center horizontally */
+            justify-content: center;
+            /* Center vertically */
+        }
+
+        .tshirt-container {
+            position: relative;
+        }
+
+        #tshirt-image {
+            width: 400px;
+            display: block;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 125px;
+            height: 230px;
+            border: 2px dashed gray;
+        }
+
+        .loading {
+            display: none;
+            font-size: 18px;
+        }
+
+        #generatedImage {
+            width: 100px;
+            height: 100px;
+            cursor: grab;
+            display: none;
+        }
+
+
+
+        /* Hide text editor and generated image panel initially */
+        #text-editor,
+        #generated-panel {
+            display: none;
+        }
+
+        .color-picker {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #000000;
+        }
+
+        .view-selector {
+            margin-top: 10px;
+        }
+
+        .button-55 {
+            align-self: center;
+            background-color: #fff;
+            background-image: none;
+            background-position: 0 90%;
+            background-repeat: repeat no-repeat;
+            background-size: 4px 3px;
+            border-radius: 15px 225px 255px 15px 15px 255px 225px 15px;
+            border-style: solid;
+            border-width: 2px;
+            box-shadow: rgba(0, 0, 0, .2) 15px 28px 25px -18px;
+            box-sizing: border-box;
+            color: #41403e;
+            cursor: pointer;
+            width: 200px;
+            display: inline-block;
+            font-family: Reenie Beanie, Neucha, sans-serif;
+            font-size: 2rem;
+            line-height: 23px;
+            outline: none;
+            padding: .75rem;
+            text-decoration: none;
+            transition: all 235ms ease-in-out;
+            border-bottom-left-radius: 15px 255px;
+            border-bottom-right-radius: 225px 15px;
+            border-top-left-radius: 255px 15px;
+            border-top-right-radius: 15px 225px;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .button-55:hover {
+            box-shadow: rgba(0, 0, 0, 0.534) 2px 8px 8px -5px;
+            transform: translate3d(0, 2px, 0);
+        }
+
+        .button-55:focus {
+            box-shadow: rgba(0, 0, 0, .3) 2px 8px 4px -6px;
+        }
+
+        .right-panel {
+            border-bottom-left-radius: 15px 255px;
+            border-bottom-right-radius: 225px 15px;
+            border-top-left-radius: 255px 15px;
+            border-top-right-radius: 15px 225px;
+            width: 250px;
+            padding: 5px;
+            border: 2px solid #1312122d;
+            background: #f9f9f901;
+            text-align: left;
+        }
+
+        .right-panel h3 {
+            margin-bottom: 10px;
+        }
+
+        /* range */
+        .slidecontainer {
+            width: 100%;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 2px;
+            border-radius: 5px;
+            background: #00000041;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+            border-radius: 50%;
+
+        }
+
+        .slider:hover {
+            opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            /* border: 2px solid rgba(66, 66, 66, 0.66); */
+            background: #3f3f3f;
+            cursor: pointer;
+        }
+
+        .styled-btn {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #18181a;
+            color: #000000;
+            display: inline-block;
+            font-size: 15px;
+            line-height: 15px;
+            padding: 5px 5px 5px;
+            text-decoration: none;
+            cursor: pointer;
+            background: #fff;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            justify-content: center;
+            /* Centers horizontally */
+            align-items: center;
+            /* Centers vertically if needed */
+        }
+
+        .styled-btn span:first-child {
+            position: relative;
+            transition: color 600ms cubic-bezier(0.48, 0, 0.12, 1);
+            z-index: 10;
+        }
+
+        .styled-btn span:last-child {
+            color: white;
+            display: block;
+            position: absolute;
+            bottom: 0;
+            transition: all 500ms cubic-bezier(0.48, 0, 0.12, 1);
+            z-index: 100;
+            opacity: 0;
+            top: 50%;
+            left: 50%;
+            transform: translateY(225%) translateX(-50%);
+            height: 14px;
+            line-height: 13px;
+        }
+
+        .styled-btn:after {
+            content: "";
+            position: absolute;
+            bottom: -50%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.594);
+            transform-origin: bottom center;
+            transition: transform 600ms cubic-bezier(0.48, 0, 0.12, 1);
+            transform: skewY(9.3deg) scaleY(0);
+            z-index: 50;
+        }
+
+        .styled-btn:hover:after {
+            transform-origin: bottom center;
+            transform: skewY(9.3deg) scaleY(2);
+        }
+
+        .styled-btn:hover span:last-child {
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 1;
+            transition: all 900ms cubic-bezier(0.48, 0, 0.12, 1);
+        }
+
+
+        #bold-btn {
+            margin-left: 20px;
+            font-size: 20px;
+        }
+
+        #italic-btn {
+            margin-left: 20px;
+            font-size: 20px;
+        }
+
+        #underline-btn {
+            margin-left: 20px;
+            font-size: 20px;
+        }
+
+        #prompt {
+            height: 40px;
+            width: 230px;
+            border: 1px solid #c0c0c0;
+            border-radius: 4px;
+            box-sizing: border-box;
+            padding: 12px;
+            font-family: "Handlee", Arial, sans-serif;
+            /* font-family:"Reenie Beanie", Arial, sans-serif; */
+            font-size: 1rem;
+        }
+
+        .delete-btn {
+            position: absolute;
+            display: none;
+            background: rgba(255, 255, 255, 0);
+            color: rgba(112, 112, 112, 0.588);
+            border: none;
+            /* padding-bottom: 10px;
+            padding-right: 15px; */
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .delete-btn:hover {
+            color: rgba(44, 44, 44, 0.954);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.48);
+
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(0, 0, 0, 0.575);
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            /* box-shadow: 0 0 5px rgba(0,0,0,0.5); */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>T-Shirt Designer</h1>
+
+    <div class="color-picker">
+        <div class="color-box" style="background-color: white;" onclick="changeColor('white')"></div>
+        <div class="color-box" style="background-color: black;" onclick="changeColor('black')"></div>
+        <div class="color-box" style="background-color: red;" onclick="changeColor('red')"></div>
+        <div class="color-box" style="background-color: blue;" onclick="changeColor('blue')"></div>
+        <div class="color-box" style="background-color: green;" onclick="changeColor('green')"></div>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <button class="button-55" id="add-text-btn">Add Text</button>
+            <br><br>
+            <br><br>
+            <input type="area" id="prompt" placeholder="Describe image">
+            <br>
+            <br>
+            <button class="button-55" id="generate-btn">Generate Image</button>
+            <p class="loading" id="loading">Please wait... <br>
+                <i class="fas fa-spinner fa-spin"></i>
+            </p>
+        </div>
+
+        <!-- T-shirt Container -->
+        <div class="tshirt-container">
+            <img id="tshirt-image" src="images/white/1.jpg" alt="T-Shirt">
+            <div id="canvas-container">
+                <canvas id="tshirt-canvas" width="125" height="230"></canvas>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <!-- Text Editor -->
+            <div id="text-editor">
+                <h3>Text Tools</h3>
+                <label>Font Size:</label>
+                <div class="slidecontainer">
+                    <input type="range" id="font-size" min="1" max="100" value="20" class="slider" id="myRange">
+                </div>
+                <br>
+                <label>Color: <input type="color" id="text-color"></label>
+                <br>
+                <br>
+                <button id="bold-btn" class="styled-btn"><i class="fa-solid fa-bold"></i></button>
+                <button id="italic-btn" class="styled-btn"><i class="fa-solid fa-italic"></i></button>
+                <button id="underline-btn" class="styled-btn"><i class="fa-solid fa-underline"></i></button>
+            </div>
+
+            <!-- Generated Image Panel -->
+            <div id="generated-panel">
+                <h3>Generated Image</h3>
+                <img id="generatedImage" alt="AI-generated Image" draggable="true" ondragstart="drag(event)">
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <small>Developed by</small> Thisara Sayakkarage
+    </div>
+    <script>
+
+        let canvas = new fabric.Canvas('tshirt-canvas');
+        let deleteButtons = [];
+        let selectedText = null;
+        let currentColor = 'white';
+        let currentView = 1;
+        let viewTexts = { 1: [], 2: [], 3: [], 4: [] };
+
+
+        function changeColor(color) {
+            currentColor = color;
+            updateTshirtImage();
+        }
+
+        function updateTshirtImage() {
+            document.getElementById('tshirt-image').src = `images/${currentColor}/${currentView}.jpg`;
+        }
+
+        // Get the red box (print area)
+        const redBox = document.getElementById("canvas-container");
+
+        // Function to show the red box
+        function showRedBox() {
+            redBox.style.borderColor = "gray";
+            console.log("Red box OPEN");
+        }
+
+        // Function to hide the red box
+        function hideRedBox() {
+            redBox.style.borderColor = "transparent";
+            console.log("Red box CLOSE");
+        }
+        hideRedBox(); // Initially hide the red box
+
+
+        // Show Text Editor and Hide Generated Image Panel
+        document.getElementById("add-text-btn").addEventListener("click", function () {
+            showRedBox(); // Show the red box when adding text
+            document.getElementById("text-editor").style.display = "block";
+            document.getElementById("generated-panel").style.display = "none";
+            addText();
+        });
+
+        // Show Generated Image Panel and Hide Text Editor
+        document.getElementById("generate-btn").addEventListener("click", function () {
+            document.getElementById("text-editor").style.display = "none";
+            document.getElementById("generated-panel").style.display = "block";
+            generateImage();
+        });
+
+        // Function to Add Text
+        function addText() {
+            showRedBox()
+            let text = new fabric.Textbox('Your Text', {
+                width: 100,
+                left: 30,
+                top: 60,
+                fontSize: 20,
+                fontFamily: 'Arial',
+                fill: '#000',
+                textAlign: 'center',
+                editable: true
+            });
+
+            canvas.add(text);
+            canvas.setActiveObject(text);
+            selectedText = text;
+
+            let deleteBtn = createDeleteButton(text);
+            deleteButtons.push(deleteBtn);
+
+            text.on('moving', function () {
+                enforceBoundaries(text);
+                updateDeleteButtonPosition(text, deleteBtn);
+            });
+
+            text.on('selected', function () {
+                selectedText = text;
+                deleteButtons.forEach(btn => btn.style.display = 'none');
+                deleteBtn.style.display = 'block';
+                updateDeleteButtonPosition(text, deleteBtn);
+            });
+
+            updateTextEditorControls();
+            canvas.renderAll();
+        }
+
+        // Enforce Text Stays Inside the Red Area
+        function enforceBoundaries(target) {
+            showRedBox();
+            const printArea = { left: 2, top: 8, width: 120, height: 220 };
+
+            if (target.left < printArea.left) target.left = printArea.left;
+            if (target.top < printArea.top) target.top = printArea.top;
+            if (target.left + target.width > printArea.left + printArea.width) {
+                target.left = printArea.left + printArea.width - target.width;
+            }
+            if (target.top + target.height > printArea.top + printArea.height) {
+                target.top = printArea.top + printArea.height - target.height;
+            }
+        }
+
+        document.body.addEventListener('click', function (event) {
+            console.log("1111");
+            const canvasContainer = document.getElementById('canvas-container'); // Red Box
+            const tshirtContainer = document.querySelector('.tshirt-container'); // Green Box
+            const activeObject = canvas.getActiveObject();
+
+
+            // If clicking on the delete button itself, don't hide it
+            if (event.target.closest('.delete-btn')) {
+                console.log("vvv");
+                return;
+            }
+
+            // If clicking on text inside the red box, don't hide the delete button
+            if (activeObject && activeObject.type === 'textbox') {
+                console.log("11");
+                return;
+            }
+
+            if (tshirtContainer.contains(event.target)) {
+                deleteButtons.forEach(btn => {
+                    btn.style.display = 'none';
+                    console.log("close");
+                });
+                console.log("22");
+            }
+            // Hide delete button when clicking anywhere inside the green box (T-shirt area)
+            if (tshirtContainer.contains(event.target)) {
+                deleteButtons.forEach(btn => {
+                    btn.style.display = 'none';
+                    console.log("close");
+                });
+                console.log("33");
+            }
+            console.log("a33");
+            hideRedBox()
+
+            // Also hide delete button when clicking outside the green box
+            if (!tshirtContainer.contains(event.target)) {
+                updateBoxColor();
+                console.log("44");
+                deleteButtons.forEach(btn => {
+                    btn.style.display = 'none';
+                    console.log("close");
+                });
+            }
+        });
+
+
+
+        function createDeleteButton(target) {
+            // Remove any existing delete button for this object
+            let existingButton = target.deleteBtn;
+            if (existingButton) {
+                existingButton.remove();
+            }
+
+            let deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.classList.add('delete-btn');
+            document.body.appendChild(deleteBtn);
+
+            deleteBtn.onclick = function () {
+                canvas.remove(target);
+                deleteBtn.remove();
+                deleteButtons = deleteButtons.filter(btn => btn !== deleteBtn);
+                hideRedBox();
+            };
+
+            updateDeleteButtonPosition(target, deleteBtn);
+
+            // Store the delete button reference inside the text object
+            target.deleteBtn = deleteBtn;
+
+            // Update delete button position while moving
+            target.on('moving', function () {
+                updateDeleteButtonPosition(target, deleteBtn);
+            });
+
+            target.on('deselected', function () {
+                deleteBtn.style.display = 'none';
+            });
+
+            return deleteBtn;
+        }
+
+        // Update Delete Button Position
+        function updateDeleteButtonPosition(target, deleteBtn) {
+            if (target && deleteBtn) {
+                const canvasRect = redBox.getBoundingClientRect();
+                const targetCoords = target.getBoundingRect();
+
+                deleteBtn.style.position = "absolute";
+                deleteBtn.style.left = `${canvasRect.left + targetCoords.left + targetCoords.width - 10}px`;
+                deleteBtn.style.top = `${canvasRect.top + targetCoords.top - 10}px`;
+                deleteBtn.style.display = "block";
+            }
+        }
+        // Apply Delete Button to Any Object on Selection
+        canvas.on('selection:created', function (event) {
+            if (event.selected.length === 1) {
+                let selectedObject = event.selected[0];
+
+                if (selectedObject.type === 'textbox') {
+                    selectedText = selectedObject;
+                    document.getElementById("text-editor").style.display = "block"; // Show text editor again
+                    document.getElementById("generated-panel").style.display = "none"; // Hide generated image panel
+                }
+
+                let deleteBtn = createDeleteButton(selectedObject);
+                deleteButtons.forEach(btn => btn.style.display = 'none');
+                deleteBtn.style.display = 'block';
+                showRedBox();
+            }
+        });
+
+        // Hide Red Box and Delete Button when clicking outside
+        document.body.addEventListener('click', function (event) {
+            const tshirtContainer = document.querySelector('.tshirt-container');
+            if (!tshirtContainer.contains(event.target) && !event.target.closest('.delete-btn')) {
+                deleteButtons.forEach(btn => btn.style.display = 'none');
+                hideRedBox();
+            }
+        });
+
+        canvas.on('selection:created', function (event) {
+            if (event.selected.length === 1) {
+                let selectedObject = event.selected[0];
+
+                if (selectedObject.type === 'textbox') {
+                    selectedText = selectedObject;
+                    document.getElementById("text-editor").style.display = "block";
+                    document.getElementById("generated-panel").style.display = "none";
+                }
+
+                let deleteBtn = createDeleteButton(selectedObject);
+                deleteButtons.forEach(btn => btn.style.display = 'none');
+                deleteBtn.style.display = 'block';
+                showRedBox();
+            }
+        });
+
+        function bringToFront(object) {
+        if (object) {
+            canvas.bringToFront(object);
+            canvas.renderAll();
+        }
+    }
+
+        // Generate Image with Loading Animation
+        async function generateImage() {
+            const prompt = document.getElementById("prompt").value;
+            if (!prompt) {
+                // alert("Please enter a description!");
+                Swal.fire({
+                    title: "Oops !",
+                    text: "Please enter a description",
+                    icon: "warning"
+                    // border: true
+                });
+                return;
+
+            }
+
+
+
+            // Show "Please wait..." animation
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("generatedImage").style.display = "none";
+
+            try {
+                // 🌟 Replace this with your AI image generation API URL
+                const response = await fetch("http://localhost:5000/generate-image", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                const data = await response.json();
+
+                if (data.imageUrl) {
+                    // Display the generated image
+                    document.getElementById("generatedImage").src = data.imageUrl;
+                    document.getElementById("generatedImage").style.display = "block";
+                } else {
+                    alert("Failed to generate image. Try again!");
+                }
+            } catch (error) {
+                console.error("Error fetching AI image:", error);
+                alert("Something went wrong. Check the console.");
+            } finally {
+                // Hide "Please wait..." animation
+                document.getElementById("loading").style.display = "none";
+            }
+        }
+
+        // Drag & Drop Image to Canvas
+        function drag(event) {
+            event.dataTransfer.setData("text", event.target.src);
+        }
+
+        document.getElementById("canvas-container").addEventListener("drop", function (event) {
+            event.preventDefault();
+            const imageUrl = event.dataTransfer.getData("text");
+            fabric.Image.fromURL(imageUrl, function (img) {
+                img.scale(0.3);
+                canvas.add(img);
+            });
+        });
+
+        document.getElementById("canvas-container").addEventListener("dragover", function (event) {
+            event.preventDefault();
+        });
+
+        // Text Editing Controls
+        document.getElementById("font-size").addEventListener("input", function () {
+            if (selectedText) {
+                selectedText.set("fontSize", parseInt(this.value));
+                canvas.renderAll();
+            }
+        });
+
+        document.getElementById("text-color").addEventListener("input", function () {
+            if (selectedText) {
+                selectedText.set("fill", this.value);
+                canvas.renderAll();
+            }
+        });
+
+        document.getElementById("bold-btn").addEventListener("click", function () {
+            if (selectedText) {
+                selectedText.set("fontWeight", selectedText.fontWeight === 'bold' ? 'normal' : 'bold');
+                canvas.renderAll();
+            }
+        });
+
+        document.getElementById("italic-btn").addEventListener("click", function () {
+            if (selectedText) {
+                selectedText.set("fontStyle", selectedText.fontStyle === 'italic' ? 'normal' : 'italic');
+                canvas.renderAll();
+            }
+        });
+
+        document.getElementById("underline-btn").addEventListener("click", function () {
+            if (selectedText) {
+                selectedText.set("underline", !selectedText.underline);
+                canvas.renderAll();
+            }
+        });
+
+    </script>
+    <script src="assets/plugins/global/plugins.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>
